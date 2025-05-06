@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Marketing Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#25D366',
+                        primaryDark: '#128C7E',
+                        secondary: '#545454',
+                        accent: '#34B7F1',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .sidebar.collapsed .sidebar-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+        }
+        .content-area {
+            transition: all 0.3s ease;
+        }
+        .content-area.expanded {
+            margin-left: 70px;
+        }
+        .contact-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .message-bubble {
+            max-width: 70%;
+        }
+        .message-bubble.sent {
+            background-color: #DCF8C6;
+            border-radius: 15px 15px 0 15px;
+        }
+        .message-bubble.received {
+            background-color: #ECECEC;
+            border-radius: 15px 15px 15px 0;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                z-index: 50;
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .content-area {
+                margin-left: 0 !important;
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Mobile Menu Button -->
+    <div class="md:hidden fixed top-4 left-4 z-50">
+        <button id="mobileMenuBtn" class="bg-primary text-white p-2 rounded-full shadow-lg">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar bg-white text-secondary h-screen fixed shadow-lg w-64 flex flex-col">
+        <!-- Logo -->
+        <div class="p-4 flex items-center border-b border-gray-200">
+            <div class="bg-primary text-white p-2 rounded-lg">
+                <i class="fab fa-whatsapp text-xl"></i>
+            </div>
+            <span class="logo-text ml-3 font-bold text-xl">WhatsApp Suite</span>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex-1 overflow-y-auto py-4">
+            <nav>
+                <div class="px-4 mb-4">
+                    <div class="text-xs uppercase font-semibold text-gray-400 mb-2 sidebar-text">Menu Principal</div>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 rounded-lg bg-primary/10 text-primary font-medium">
+                        <i class="fas fa-tachometer-alt mr-3"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="px-4 mb-4">
+                    <div class="text-xs uppercase font-semibold text-gray-400 mb-2 sidebar-text">Clientes</div>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-users mr-3"></i>
+                        <span class="sidebar-text">Lista de Clientes</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-user-plus mr-3"></i>
+                        <span class="sidebar-text">Adicionar Cliente</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-tags mr-3"></i>
+                        <span class="sidebar-text">Categorias & Tags</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-file-import mr-3"></i>
+                        <span class="sidebar-text">Importar/Exportar</span>
+                    </a>
+                </div>
+
+                <div class="px-4 mb-4">
+                    <div class="text-xs uppercase font-semibold text-gray-400 mb-2 sidebar-text">Mensagens</div>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-comment-dots mr-3"></i>
+                        <span class="sidebar-text">Nova Mensagem</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-calendar-alt mr-3"></i>
+                        <span class="sidebar-text">Mensagens Agendadas</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-history mr-3"></i>
+                        <span class="sidebar-text">Histórico</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-file-alt mr-3"></i>
+                        <span class="sidebar-text">Modelos de Mensagem</span>
+                    </a>
+                </div>
+
+                <div class="px-4 mb-4">
+                    <div class="text-xs uppercase font-semibold text-gray-400 mb-2 sidebar-text">Relatórios</div>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-chart-line mr-3"></i>
+                        <span class="sidebar-text">Estatísticas</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-bell mr-3"></i>
+                        <span class="sidebar-text">Alertas</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- User Profile -->
+        <div class="p-4 border-t border-gray-200">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                    <i class="fas fa-user text-gray-600"></i>
+                </div>
+                <div class="ml-3 sidebar-text">
+                    <div class="font-medium">Admin</div>
+                    <div class="text-xs text-gray-500">admin@empresa.com</div>
+                </div>
+                <button class="ml-auto text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="contentArea" class="content-area ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-secondary">Dashboard</h1>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <input type="text" placeholder="Buscar..." class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+                <button class="text-gray-500 hover:text-primary">
+                    <i class="fas fa-bell text-xl"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-4">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 text-primary">
+                            <i class="fas fa-users text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-gray-500">Total Clientes</div>
+                            <div class="text-2xl font-bold">1,248</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-accent">
+                            <i class="fas fa-comment-dots text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-gray-500">Mensagens Hoje</div>
+                            <div class="text-2xl font-bold">328</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-500">
+                            <i class="fas fa-eye text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-gray-500">Taxa de Abertura</div>
+                            <div class="text-2xl font-bold">78%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-red-100 text-red-500">
+                            <i class="fas fa-exclamation-triangle text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-gray-500">Clientes Inativos</div>
+                            <div class="text-2xl font-bold">42</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="bg-white rounded-lg shadow mb-6">
+                <div class="border-b border-gray-200">
+                    <nav class="flex -mb-px">
+                        <button data-tab="contacts" class="tab-btn py-4 px-6 text-center border-b-2 font-medium text-sm border-primary text-primary">Clientes</button>
+                        <button data-tab="messages" class="tab-btn py-4 px-6 text-center border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Mensagens</button>
+                        <button data-tab="reports" class="tab-btn py-4 px-6 text-center border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Relatórios</button>
+                        <button data-tab="settings" class="tab-btn py-4 px-6 text-center border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Configurações</button>
+                    </nav>
+                </div>
+                <div class="p-4">
+                    <!-- Contacts Tab -->
+                    <div id="contacts" class="tab-content active">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold">Lista de Clientes</h2>
+                            <div class="flex space-x-2">
+                                <button class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg flex items-center">
+                                    <i class="fas fa-plus mr-2"></i> Novo Cliente
+                                </button>
+                                <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center">
+                                    <i class="fas fa-file-import mr-2"></i> Importar
+                                </button>
+                                <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center">
+                                    <i class="fas fa-file-export mr-2"></i> Exportar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                            <div class="relative mb-2 md:mb-0 md:w-64">
+                                <input type="text" placeholder="Filtrar clientes..." class="pl-10 pr-4 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                            <div class="flex space-x-2">
+                                <select class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option>Todas Categorias</option>
+                                    <option>Clientes Ativos</option>
+                                    <option>Clientes Inativos</option>
+                                    <option>Premium</option>
+                                    <option>Básico</option>
+                                </select>
+                                <select class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option>Todas Tags</option>
+                                    <option>Interessado em X</option>
+                                    <option>Promoção Y</option>
+                                    <option>Zona Norte</option>
+                                    <option>Zona Sul</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white rounded-lg overflow-hidden">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tags</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                    <i class="fas fa-user text-gray-600"></i>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="font-medium">João Silva</div>
+                                                    <div class="text-gray-500">joao@email.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-gray-900">+55 11 98765-4321</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Ativo</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex flex-wrap gap-1">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Premium</span>
+                                                <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Zona Sul</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Ativo</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button class="text-primary hover:text-primaryDark mr-3">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="text-accent hover:text-blue-700 mr-3">
+                                                <i class="fab fa-whatsapp"></i>
+                                            </button>
+                                            <button class="text-red-500 hover:text-red-700">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                    <i class="fas fa-user text-gray-600"></i>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="font-medium">Maria Souza</div>
+                                                    <div class="text-gray-500">maria@email.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-gray-900">+55 11 91234-5678</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Básico</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex flex-wrap gap-1">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Zona Norte</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Ativo</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button class="text-primary hover:text-primaryDark mr-3">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="text-accent hover:text-blue-700 mr-3">
+                                                <i class="fab fa-whatsapp"></i>
+                                            </button>
+                                            <button class="text-red-500 hover:text-red-700">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                    <i class="fas fa-user text-gray-600"></i>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="font-medium">Carlos Oliveira</div>
+                                                    <div class="text-gray-500">carlos@email.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-gray-900">+55 11 92345-6789</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Inativo</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex flex-wrap gap-1">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Premium</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Inativo</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button class="text-primary hover:text-primaryDark mr-3">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="text-accent hover:text-blue-700 mr-3">
+                                                <i class="fab fa-whatsapp"></i>
+                                            </button>
+                                            <button class="text-red-500 hover:text-red-700">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-4 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">
+                                Mostrando 1 a 3 de 1,248 clientes
+                            </div>
+                            <div class="flex space-x-1">
+                                <button class="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-50">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button class="px-3 py-1 border rounded-lg bg-primary text-white">1</button>
+                                <button class="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-50">2</button>
+                                <button class="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-50">3</button>
+                                <span class="px-3 py-1">...</span>
+                                <button class="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-50">50</button>
+                                <button class="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-50">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages Tab -->
+                    <div id="messages" class="tab-content">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold">Nova Mensagem em Massa</h2>
+                            <div class="flex space-x-2">
+                                <button class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg flex items-center">
+                                    <i class="fas fa-paper-plane mr-2"></i> Enviar Agora
+                                </button>
+                                <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center">
+                                    <i class="fas fa-calendar-alt mr-2"></i> Agendar
+                                </button>
+                                <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center">
+                                    <i class="fas fa-save mr-2"></i> Salvar Rascunho
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-2">
+                                <div class="bg-white rounded-lg shadow p-4 mb-4">
+                                    <div class="mb-4">
+                                        <label class="block text-gray-700 mb-2">Destinatários</label>
+                                        <div class="flex flex-wrap gap-2 mb-2">
+                                            <span class="px-3 py-1 bg-gray-100 rounded-full text-sm flex items-center">
+                                                Todos Clientes (1,248)
+                                                <button class="ml-2 text-gray-500 hover:text-gray-700">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </span>
+                                            <button class="text-primary hover:text-primaryDark text-sm flex items-center">
+                                                <i class="fas fa-filter mr-1"></i> Filtrar
+                                            </button>
+                                        </div>
+                                        <div class="relative">
+                                            <input type="text" placeholder="Adicionar destinatários..." class="pl-10 pr-4 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="block text-gray-700 mb-2">Mensagem</label>
+                                        <div class="border rounded-lg overflow-hidden">
+                                            <div class="p-3 bg-gray-50 border-b flex items-center">
+                                                <button class="text-gray-500 hover:text-gray-700 p-1 mr-1">
+                                                    <i class="fas fa-bold"></i>
+                                                </button>
+                                                <button class="text-gray-500 hover:text-gray-700 p-1 mr-1">
+                                                    <i class="fas fa-italic"></i>
+                                                </button>
+                                                <button class="text-gray-500 hover:text-gray-700 p-1 mr-1">
+                                                    <i class="fas fa-underline"></i>
+                                                </button>
+                                                <div class="border-l h-5 mx-2 border-gray-300"></div>
+                                                <button class="text-gray-500 hover:text-gray-700 p-1 mr-1">
+                                                    <i class="fas fa-link"></i>
+                                                </button>
+                                                <button class="text-gray-500 hover:text-gray-700 p-1 mr-1">
+                                                    <i class="fas fa-image"></i>
+                                                </button>
+                                                <button class="text-gray-500 hover:text-gray-700 p-1 mr-1">
+                                                    <i class="fas fa-paperclip"></i>
+                                                </button>
+                                                <div class="border-l h-5 mx-2 border-gray-300"></div>
+                                                <button class="text-gray-500 hover:text-gray-700 p-1 mr-1">
+                                                    <i class="fas fa-smile"></i>
+                                                </button>
+                                                <div class="ml-auto">
+                                                    <button class="text-gray-500 hover:text-gray-700 p-1">
+                                                        <i class="fas fa-ellipsis-h"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <textarea class="w-full p-3 focus:outline-none" rows="6" placeholder="Digite sua mensagem aqui..."></textarea>
+                                            <div class="p-3 bg-gray-50 border-t text-sm text-gray-500">
+                                                <i class="fas fa-info-circle mr-1"></i> Use {{nome}} para personalizar com o nome do cliente
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="block text-gray-700 mb-2">Modelos de Mensagem</label>
+                                        <select class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                            <option>Selecione um modelo...</option>
+                                            <option>Promoção de Verão</option>
+                                            <option>Lembrete de Pagamento</option>
+                                            <option>Confirmação de Agendamento</option>
+                                            <option>Pesquisa de Satisfação</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="bg-white rounded-lg shadow p-4 mb-4">
+                                    <h3 class="font-semibold mb-3">Pré-visualização</h3>
+                                    <div class="bg-gray-100 rounded-lg p-3">
+                                        <div class="flex items-center mb-3">
+                                            <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                <i class="fas fa-user text-gray-600"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <div class="font-medium">João Silva</div>
+                                                <div class="text-xs text-gray-500">Online</div>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <div class="message-bubble sent p-3 ml-auto">
+                                                <div class="text-sm">Olá {{nome}}, tudo bem?</div>
+                                                <div class="text-xs text-gray-500 text-right mt-1">10:30</div>
+                                            </div>
+                                            <div class="message-bubble received p-3">
+                                                <div class="text-sm">Olá, tudo sim! E com você?</div>
+                                                <div class="text-xs text-gray-500 mt-1">10:31</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white rounded-lg shadow p-4">
+                                    <h3 class="font-semibold mb-3">Opções de Envio</h3>
+                                    <div class="mb-3">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="form-checkbox rounded text-primary">
+                                            <span class="ml-2">Enviar apenas para clientes ativos</span>
+                                        </label>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="form-checkbox rounded text-primary">
+                                            <span class="ml-2">Enviar apenas durante horário comercial</span>
+                                        </label>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="form-checkbox rounded text-primary">
+                                            <span class="ml-2">Limitar a 100 mensagens por hora</span>
+                                        </label>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="block text-gray-700 mb-1">Agendar para:</label>
+                                        <div class="flex">
+                                            <input type="date" class="border rounded-l-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                            <input type="time" class="border rounded-r-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reports Tab -->
+                    <div id="reports" class="tab-content">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold">Relatórios e Estatísticas</h2>
+                            <div class="flex space-x-2">
+                                <select class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option>Últimos 7 dias</option>
+                                    <option>Últimos 30 dias</option>
+                                    <option>Este mês</option>
+                                    <option>Mês passado</option>
+                                    <option>Personalizado...</option>
+                                </select>
+                                <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center">
+                                    <i class="fas fa-download mr-2"></i> Exportar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-white rounded-lg shadow p-4">
+                                <h3 class="font-semibold mb-3">Mensagens Enviadas</h3>
+                                <div class="chart-container">
+                                    <canvas id="messagesChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-4">
+                                <h3 class="font-semibold mb-3">Status das Mensagens</h3>
+                                <div class="chart-container">
+                                    <canvas id="statusChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-4 mb-6">
+                            <h3 class="font-semibold mb-3">Histórico de Envios</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr class="border-b">
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data/Hora</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mensagem</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destinatários</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">15/06/2023 10:30</div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <div class="text-sm text-gray-900">Promoção de Verão - 20% off</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">1,024 clientes</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Enviado (78%)</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <button class="text-primary hover:text-primaryDark mr-2">
+                                                    <i class="fas fa-chart-bar"></i>
+                                                </button>
+                                                <button class="text-accent hover:text-blue-700">
+                                                    <i class="fas fa-redo"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">10/06/2023 14:15</div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <div class="text-sm text-gray-900">Lembrete: Pagamento em atraso</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">42 clientes</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Parcial (92%)</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <button class="text-primary hover:text-primaryDark mr-2">
+                                                    <i class="fas fa-chart-bar"></i>
+                                                </button>
+                                                <button class="text-accent hover:text-blue-700">
+                                                    <i class="fas fa-redo"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">05/06/2023 09:00</div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <div class="text-sm text-gray-900">Confirmação de agendamento</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">18 clientes</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Enviado (100%)</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <button class="text-primary hover:text-primaryDark mr-2">
+                                                    <i class="fas fa-chart-bar"></i>
+                                                </button>
+                                                <button class="text-accent hover:text-blue-700">
+                                                    <i class="fas fa-redo"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <h3 class="font-semibold mb-3">Alertas e Lembretes</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-start p-3 border rounded-lg">
+                                    <div class="flex-shrink-0 mt-1">
+                                        <i class="fas fa-exclamation-circle text-yellow-500"></i>
+                                    </div>
+                                    <div class="ml-3 flex-1">
+                                        <div class="font-medium">42 clientes inativos há mais de 30 dias</div>
+                                        <div class="text-sm text-gray-500 mt-1">Recomendamos enviar uma mensagem de reengajamento</div>
+                                    </div>
+                                    <button class="text-primary hover:text-primaryDark text-sm">
+                                        Criar Campanha
+                                    </button>
+                                </div>
+                                <div class="flex items-start p-3 border rounded-lg">
+                                    <div class="flex-shrink-0 mt-1">
+                                        <i class="fas fa-bell text-blue-500"></i>
+                                    </div>
+                                    <div class="ml-3 flex-1">
+                                        <div class="font-medium">12 aniversários hoje</div>
+                                        <div class="text-sm text-gray-500 mt-1">Envie mensagens personalizadas de parabéns</div>
+                                    </div>
+                                    <button class="text-primary hover:text-primaryDark text-sm">
+                                        Enviar Mensagem
+                                    </button>
+                                </div>
+                                <div class="flex items-start p-3 border rounded-lg">
+                                    <div class="flex-shrink-0 mt-1">
+                                        <i class="fas fa-chart-line text-green-500"></i>
+                                    </div>
+                                    <div class="ml-3 flex-1">
+                                        <div class="font-medium">Taxa de abertura aumentou 15% esta semana</div>
+                                        <div class="text-sm text-gray-500 mt-1">Continue com o bom trabalho!</div>
+                                    </div>
+                                    <button class="text-primary hover:text-primaryDark text-sm">
+                                        Ver Detalhes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Tab -->
+                    <div id="settings" class="tab-content">
+                        <div class="bg-white rounded-lg shadow p-4 mb-6">
+                            <h2 class="text-lg font-semibold mb-4">Configurações da Conta</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h3 class="font-medium mb-3">Informações Básicas</h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-gray-700 mb-1">Nome da Empresa</label>
+                                            <input type="text" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="Minha Empresa">
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-700 mb-1">Telefone Principal</label>
+                                            <input type="tel" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="+55 11 91234-5678">
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-700 mb-1">E-mail</label>
+                                            <input type="email" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="contato@empresa.com">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium mb-3">Integração com WhatsApp</h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-gray-700 mb-1">Número do WhatsApp</label>
+                                            <input type="tel" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="+55 11 98765-4321">
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-700 mb-1">API Key</label>
+                                            <input type="password" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="********">
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="enableApi" class="form-checkbox rounded text-primary" checked>
+                                            <label for="enableApi" class="ml-2">Ativar integração com API</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-6 border-t">
+                                <button class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg">
+                                    Salvar Alterações
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-4 mb-6">
+                            <h2 class="text-lg font-semibold mb-4">Configurações de Envio</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-gray-700 mb-1">Horário Comercial</label>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-gray-500 text-sm mb-1">Início</label>
+                                            <input type="time" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="09:00">
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-500 text-sm mb-1">Término</label>
+                                            <input type="time" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="18:00">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-1">Limite de Mensagens</label>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-gray-500 text-sm mb-1">Por Hora</label>
+                                            <input type="number" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="100">
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-500 text-sm mb-1">Por Dia</label>
+                                            <input type="number" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" value="500">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="enableDelay" class="form-checkbox rounded text-primary" checked>
+                                    <label for="enableDelay" class="ml-2">Adicionar atraso entre mensagens</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="enableSignature" class="form-checkbox rounded text-primary">
+                                    <label for="enableSignature" class="ml-2">Adicionar assinatura automática</label>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-6 border-t">
+                                <button class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg">
+                                    Salvar Alterações
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <h2 class="text-lg font-semibold mb-4">Backup e Restauração</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="border rounded-lg p-4 text-center">
+                                    <div class="bg-blue-100 text-blue-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                                        <i class="fas fa-file-export text-2xl"></i>
+                                    </div>
+                                    <h3 class="font-medium mb-2">Exportar Dados</h3>
+                                    <p class="text-gray-500 text-sm mb-4">Exporte todos os seus clientes e histórico de mensagens para um arquivo seguro.</p>
+                                    <button class="bg-white border border-primary text-primary hover:bg-primary hover:text-white px-4 py-2 rounded-lg">
+                                        Exportar Tudo
+                                    </button>
+                                </div>
+                                <div class="border rounded-lg p-4 text-center">
+                                    <div class="bg-green-100 text-green-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                                        <i class="fas fa-file-import text-2xl"></i>
+                                    </div>
+                                    <h3 class="font-medium mb-2">Importar Dados</h3>
+                                    <p class="text-gray-500 text-sm mb-4">Importe clientes e configurações de um arquivo de backup.</p>
+                                    <button class="bg-white border border-primary text-primary hover:bg-primary hover:text-white px-4 py-2 rounded-lg">
+                                        Importar Dados
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.getElementById('sidebar');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+
+        // Tab switching
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('border-primary', 'text-primary');
+                    btn.classList.add('border-transparent', 'text-gray-500');
+                });
+                
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Add active class to clicked button and corresponding content
+                button.classList.remove('border-transparent', 'text-gray-500');
+                button.classList.add('border-primary', 'text-primary');
+                
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Charts
+        // Messages Chart
+        const messagesCtx = document.getElementById('messagesChart').getContext('2d');
+        const messagesChart = new Chart(messagesCtx, {
+            type: 'line',
+            data: {
+                labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                datasets: [{
+                    label: 'Mensagens Enviadas',
+                    data: [120, 190, 170, 210, 240, 180, 150],
+                    backgroundColor: 'rgba(37, 211, 102, 0.2)',
+                    borderColor: 'rgba(37, 211, 102, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Status Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        const statusChart = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Enviadas', 'Entregues', 'Lidas', 'Erros'],
+                datasets: [{
+                    data: [35, 30, 25, 10],
+                    backgroundColor: [
+                        '#25D366',
+                        '#34B7F1',
+                        '#128C7E',
+                        '#FF0000'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+
+        // Sample function to simulate sending a message
+        function sendMessage() {
+            alert('Mensagem enviada com sucesso para os clientes selecionados!');
+        }
+    </script>
+</body>
+</html>
